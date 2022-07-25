@@ -4,6 +4,6 @@
   "not" : "\\lnot",
   "implies" : "\\implies",
   "iff" : "\\iff",
-  "integral from" : "\\\\int\\\\limits_{$1}^{$2} $3\\\\, d$4",
-  "integral" : "\\\\int $1\\\\, d$2",
+  "integral from" : "\\int\\limits_{$1}^{$2} $3\\, d$4",
+  "integral" : "\\int $1\\, d$2"
 }
