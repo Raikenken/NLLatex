@@ -3,6 +3,7 @@ import json
 from sympy import *
 import csv
 
+
 class LatexProcessor:
     def __init__(self):
         with open('keywords.csv', 'r') as f:
@@ -30,15 +31,85 @@ class LatexProcessor:
         return Integral(equation, symbols(variable))
 
     def definite_integral_form(self, equation, variable, lower_bound, upper_bound):
-        if self.islatexnumeric(lower_bound) and self.islatexnumeric(upper_bound):
+        if self.is_latex_numeric(lower_bound) and self.is_latex_numeric(upper_bound):
             return Integral(equation, (symbols(variable), lower_bound, upper_bound))
         else:
-            if not(self.islatexnumeric(lower_bound)):
+            if not (self.is_latex_numeric(lower_bound)):
                 lower_bound = symbols(lower_bound)
-            if not(self.islatexnumeric(upper_bound)):
+            if not (self.is_latex_numeric(upper_bound)):
                 upper_bound = symbols(upper_bound)
             return Integral(equation, (symbols(variable), lower_bound, upper_bound))
 
-    def islatexnumeric(self, input_string):
+    def is_latex_numeric(self, input_string):
         # checks if input string is a number
+        input_string = input_string.strip()
         return input_string.isnumeric() or input_string == "oo"
+
+    def parse_text(self, text):
+        tokens = text.split()
+        clean_text = "$"
+
+        ctr = 0;
+        # fix to change variables in translations
+        while ctr < len(tokens):
+            if tokens[ctr] in self.translations.keys():
+                if tokens[ctr] == "integral":
+                    if tokens[ctr + 1] == "from":
+                        lower_bound = ""
+                        upper_bound = ""
+                        equation = ""
+                        variable = ""
+
+                        ctr += 2
+
+                        while tokens[ctr] != "to":
+                            lower_bound += tokens[ctr] + " "
+                            ctr += 1
+                        ctr += 1
+
+                        while tokens[ctr] != "of":
+                            upper_bound += tokens[ctr] + " "
+                            ctr += 1
+                        ctr += 1
+
+                        while tokens[ctr] != "variable":
+                            equation += tokens[ctr] + " "
+                            ctr += 1
+                        ctr += 1
+
+                        variable = tokens[ctr]
+
+                        integral = self.definite_integral_form(equation, variable, lower_bound, upper_bound)
+
+                        clean_text += self.clean_text_to_latex(integral) + " "
+
+                        ctr += 1
+
+                    else:
+                        equation = ""
+                        variable = ""
+
+                        ctr += 1
+
+                        while tokens[ctr] != "variable":
+                            equation += tokens[ctr] + " "
+                            ctr += 1
+                        ctr += 1
+
+                        variable = tokens[ctr]
+
+                        integral = self.indefinite_integral_form(equation, variable)
+
+                        clean_text += self.clean_text_to_latex(integral) + " "
+
+                        ctr += 1
+
+                else:
+                    clean_text += self.translations[tokens[ctr]] + " "
+            else:
+                clean_text += tokens[ctr] + " "
+            ctr += 1
+
+        clean_text += "$"
+
+        return clean_text
